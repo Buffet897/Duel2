@@ -54,3 +54,13 @@ N/A — app requires no accounts.
 - Backend: locales/{nl,en}.json (email + og_description), request_lang() helper, doc.lang stored on create, send_result_email reads duel.lang, /api/share/duel returns lang-aware og:description + html attribute
 - Privacy + Terms intentionally remain Dutch legal text (translating would alter meaning); chrome around them is translated
 - 11/11 i18n backend tests pass on top of existing 32/32 Sprint 1+2 suite
+
+## Sprint 4 — Plesk-ready deployment package (2026-02)
+- `/app/ecosystem.config.js` — PM2 + uvicorn (port 3000, --proxy-headers, 2 workers)
+- `/app/migrate.py` — MongoDB index bootstrap (duels, votes, reports, stats)
+- `/app/.env.example` — full env template (Mongo, SMTP, Resend, paths)
+- `/app/README-deploy.md` — 11-step Plesk walkthrough + troubleshooting table
+- `/app/build-frontend.sh` — yarn build → copies to backend/frontend_build
+- `/app/.gitignore` — extended with uploads, frontend_build, logs, .env
+- server.py: UPLOAD_DIR + FRONTEND_BUILD_DIR env-configurable; SPA catch-all route serves React build alongside API; flexible mailer (SMTP → Resend → no-op)
+- deployment_agent static analysis: PASS, zero findings
