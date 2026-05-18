@@ -1,0 +1,130 @@
+{
+  "project_name": "OutfitDuel",
+  "theme_and_archetype": {
+    "theme": "light",
+    "archetype": "Pastel & Soft (Minimalist Variant)",
+    "description": "Clean, minimalist, mobile-first design. High contrast black text on white background with a soft purple (#7F77DD) accent. The vibe is modern fashion editorial meets social utility."
+  },
+  "typography": {
+    "fonts": {
+      "headings": "Outfit",
+      "body": "Inter",
+      "import_urls": [
+        "https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap",
+        "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      ]
+    },
+    "rules": {
+      "h1": "text-3xl sm:text-4xl font-bold tracking-tight text-gray-950",
+      "h2": "text-2xl sm:text-3xl font-semibold tracking-tight text-gray-900",
+      "h3": "text-xl font-semibold text-gray-900",
+      "body": "text-base text-gray-600 leading-relaxed font-normal",
+      "labels": "text-xs font-semibold tracking-[0.05em] uppercase text-gray-500",
+      "buttons": "text-base font-medium tracking-wide"
+    }
+  },
+  "colors": {
+    "background": {
+      "primary": "#FFFFFF",
+      "secondary": "#FAFAFA",
+      "card": "#FFFFFF",
+      "overlay": "rgba(0,0,0,0.4)"
+    },
+    "text": {
+      "primary": "#050505",
+      "secondary": "#525252",
+      "muted": "#A3A3A3",
+      "inverse": "#FFFFFF"
+    },
+    "brand": {
+      "primary": "#7F77DD",
+      "primary_hover": "#6B62D6",
+      "primary_light": "#F2F1FA"
+    },
+    "borders": {
+      "default": "#E5E5E5",
+      "focus": "#7F77DD"
+    },
+    "status": {
+      "success": "#10B981",
+      "error": "#EF4444"
+    }
+  },
+  "spacing_and_layout": {
+    "strategy": "mobile-first",
+    "container": "w-full max-w-md mx-auto px-4 min-h-screen bg-white relative shadow-sm border-x border-gray-100",
+    "padding": "p-4 sm:p-6",
+    "border_radius": {
+      "small": "rounded-lg",
+      "default": "rounded-xl",
+      "large": "rounded-2xl",
+      "full": "rounded-full"
+    },
+    "shadows": {
+      "card": "shadow-[0_4px_24px_rgba(0,0,0,0.04)]",
+      "button": "shadow-[0_2px_8px_rgba(127,119,221,0.25)]"
+    }
+  },
+  "component_rules": {
+    "buttons": {
+      "primary": "w-full bg-[#7F77DD] text-white py-3.5 px-6 rounded-full font-medium hover:bg-[#6B62D6] transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2",
+      "secondary": "w-full bg-gray-100 text-gray-900 py-3.5 px-6 rounded-full font-medium hover:bg-gray-200 transition-all active:scale-[0.98] flex items-center justify-center gap-2",
+      "outline": "w-full border-2 border-gray-200 text-gray-900 py-3 px-6 rounded-full font-medium hover:border-gray-300 transition-all active:scale-[0.98] flex items-center justify-center gap-2",
+      "vote_a": "flex-1 bg-white border-2 border-gray-100 py-4 rounded-2xl shadow-sm hover:border-[#7F77DD] hover:bg-[#F2F1FA] transition-all font-semibold text-lg flex flex-col items-center gap-1 text-gray-900",
+      "vote_b": "flex-1 bg-white border-2 border-gray-100 py-4 rounded-2xl shadow-sm hover:border-[#7F77DD] hover:bg-[#F2F1FA] transition-all font-semibold text-lg flex flex-col items-center gap-1 text-gray-900"
+    },
+    "inputs": {
+      "text": "w-full border border-gray-200 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-[#7F77DD]/30 focus:border-[#7F77DD] transition-all placeholder:text-gray-400 bg-gray-50/50"
+    },
+    "cards": {
+      "image_upload": "aspect-[3/4] w-full border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center bg-gray-50 text-gray-400 hover:bg-gray-100 transition-colors cursor-pointer overflow-hidden relative",
+      "result_export_1080x1920": "w-[1080px] h-[1920px] bg-white flex flex-col p-16 relative overflow-hidden",
+      "result_export_1080x1080": "w-[1080px] h-[1080px] bg-white flex flex-col p-12 relative overflow-hidden"
+    },
+    "progress_bars": {
+      "container": "h-3 w-full bg-gray-100 rounded-full overflow-hidden relative",
+      "fill": "h-full bg-[#7F77DD] rounded-full transition-all duration-1000 ease-out"
+    }
+  },
+  "motion_and_interactions": {
+    "page_transition": "opacity-0 animate-in fade-in duration-300",
+    "swipe_animation": "Use framer-motion for Tinder-style swiping on mobile. Drag constraints applied to main photo container. Threshold for vote trigger is 50px offset.",
+    "vote_reveal": "Photos smoothly transition from 50/50 side-by-side to full percentage breakdown with an expanding progress bar.",
+    "hover_states": "All buttons should have a slight scale effect (`active:scale-[0.98]`) to feel tactile."
+  },
+  "icons": {
+    "library": "lucide-react",
+    "usage": "Use icons sparsely. Upload, Share, Download, ArrowRight, Check."
+  },
+  "media_and_images": {
+    "rules": "Never use placeholders. Use the provided Unsplash URLs for the popular feed.",
+    "feed_placeholders": [
+      {
+        "url": "https://images.unsplash.com/photo-1768825136230-34fb80291f19?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTB8MHwxfHNlYXJjaHw0fHxmYXNoaW9uJTIwc3RyZWV0JTIwc3R5bGUlMjBmdWxsJTIwYm9keXxlbnwwfHx8fDE3NzkwOTY2Nzh8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Street style outfit A"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1624353656309-8be1a6c457be?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTB8MHwxfHNlYXJjaHwxfHxmYXNoaW9uJTIwc3RyZWV0JTIwc3R5bGUlMjBmdWxsJTIwYm9keXxlbnwwfHx8fDE3NzkwOTY2Nzh8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Street style outfit B"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1602757643909-1ca043f4b862?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2ODh8MHwxfHNlYXJjaHwyfHxjYXN1YWwlMjBvdXRmaXQlMjBtaXJyb3IlMjBzZWxmaWV8ZW58MHx8fHwxNzc5MDk2Njc4fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Mirror selfie casual A"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1741939483735-6923b430ca89?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2ODh8MHwxfHNlYXJjaHwxfHxjYXN1YWwlMjBvdXRmaXQlMjBtaXJyb3IlMjBzZWxmaWV8ZW58MHx8fHwxNzc5MDk2Njc4fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Mirror selfie casual B"
+      }
+    ]
+  },
+  "instructions_to_main_agent": {
+    "general": "Build this application as a mobile-first PWA-style web app. The container should have a max-width of 'max-w-md' centered on the screen for desktop to maintain the mobile feel. All texts should be in Dutch.",
+    "layout_structure": "Use standard HTML/Tailwind for the main structure. Avoid excessive Shadcn wrappers for the main feed to keep the DOM light. Use Shadcn for specific interactive elements like Modals, Toasts, or Dropdowns if needed.",
+    "voting_interface": "The voting interface MUST support two modes: Side-by-side tap buttons ('Stem A' vs 'Stem B') AND mobile swipe (framer-motion useDrag). Swiping left = Vote A, right = Vote B. Show clear visual feedback on swipe.",
+    "image_export_feature": "For the Shareable Result Card (PNG Export): Create an off-screen/hidden React component with fixed dimensions (1080x1920 for Stories, 1080x1080 for Feed). Use 'html-to-image' or a similar library to render this DOM node into a PNG data URL. Include branding 'outfitduel.com' and the text 'X stemmen'. Include a toggle state to render the card with or without the actual photos.",
+    "open_graph": "Ensure server-side rendering or meta tag injection for Open Graph properties per duel so WhatsApp/iMessage previews work beautifully.",
+    "anti_double_vote": "Implement basic protection. Store a cookie/localstorage flag upon voting. On the server, track IPs per duel ID.",
+    "post_vote_cta": "Exactly 3 seconds after a vote is registered, fade in or slide up a CTA: 'Heb jij ook een outfit-dilemma? Maak gratis een duel →' with a live (or mocked live) counter 'X duels deze week'.",
+    "testing": "MANDATORY: Add `data-testid` to all interactive elements (buttons, inputs, swipe containers) using kebab-case role-based naming (e.g., `data-testid=\"vote-button-a\"`, `data-testid=\"upload-photo-a\"`)."
+  }
+}
