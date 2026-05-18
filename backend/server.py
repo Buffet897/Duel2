@@ -57,8 +57,12 @@ from starlette.middleware.cors import CORSMiddleware
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / ".env")
 
-UPLOAD_DIR = ROOT_DIR / "uploads"
+UPLOAD_DIR = Path(os.environ.get("UPLOAD_DIR", str(ROOT_DIR / "uploads"))).expanduser()
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+FRONTEND_BUILD_DIR = Path(
+    os.environ.get("FRONTEND_BUILD_DIR", str(ROOT_DIR / "frontend_build"))
+).expanduser()
 
 MAX_BYTES = 10 * 1024 * 1024  # hard 10MB cap, server-enforced
 TARGET_MAX_WIDTH = 1200
@@ -79,6 +83,70 @@ db = client[os.environ["DB_NAME"]]
 resend.api_key = os.environ.get("RESEND_API_KEY", "")
 SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "onboarding@resend.dev")
 ABUSE_EMAIL = os.environ.get("ABUSE_EMAIL", "abuse@outfitduel.com")
+CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", ABUSE_EMAIL)
+FROM_EMAIL = os.environ.get("FROM_EMAIL", SENDER_EMAIL)
+
+# SMTP fallback (Plesk-style mailbox). When any of these are set we prefer SMTP
+# over Resend so VPS deployments don't need a Resend account.
+SMTP_HOST = os.environ.get("SMTP_HOST", "").strip()
+SMTP_PORT = int(os.environ.get("SMTP_PORT", "587") or 587)
+SMTP_USER = os.environ.get("SMTP_USER", "").strip()
+SMTP_PASS = os.environ.get("SMTP_PASS", "")
+SMTP_TLS = os.environ.get("SMTP_TLS", "true").lower() != "false"
+
+
+def _send_smtp_sync(to_email: str, subject: str, html: str) -> None:
+    """Blocking SMTP send via stdlib smtplib. Runs in a worker thread."""
+    import smtplib
+    from email.message import EmailMessage
+
+    msg = EmailMessage()
+    msg["Subject"] = subject
+    msg["From"] = FROM_EMAIL or SMTP_USER
+    msg["To"] = to_email
+    msg.set_content("Open this email in an HTML-capable client.")
+    msg.add_alternative(html, subtype="html")
+
+    if SMTP_TLS:
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=15) as smtp:
+            smtp.ehlo()
+            try:
+                smtp.starttls()
+                smtp.ehlo()
+            except smtplib.SMTPNotSupportedError:
+                pass
+            if SMTP_USER:
+                smtp.login(SMTP_USER, SMTP_PASS)
+            smtp.send_message(msg)
+    else:
+        with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=15) as smtp:
+            if SMTP_USER:
+                smtp.login(SMTP_USER, SMTP_PASS)
+            smtp.send_message(msg)
+
+
+async def send_mail(to_email: str, subject: str, html: str) -> bool:
+    """Send a transactional email. Order: SMTP (Plesk) → Resend → no-op."""
+    if not to_email:
+        return False
+    if SMTP_HOST:
+        try:
+            await asyncio.to_thread(_send_smtp_sync, to_email, subject, html)
+            return True
+        except Exception as exc:
+            logger.warning("SMTP send failed: %s", exc)
+            return False
+    if resend.api_key:
+        try:
+            await asyncio.to_thread(
+                resend.Emails.send,
+                {"from": FROM_EMAIL or SENDER_EMAIL, "to": [to_email], "subject": subject, "html": html},
+            )
+            return True
+        except Exception as exc:
+            logger.warning("Resend send failed: %s", exc)
+            return False
+    return False
 
 # Locales — load both files once at startup
 LOCALES_DIR = ROOT_DIR / "locales"
@@ -306,7 +374,9 @@ async def compress_and_save(upload: UploadFile, slot: str, duel_id: str) -> str:
 
 
 async def send_result_email(duel: dict) -> None:
-    if not duel.get("email") or not resend.api_key:
+    if not duel.get("email"):
+        return
+    if not SMTP_HOST and not resend.api_key:
         return
     votes_a = duel.get("votes_a", 0)
     votes_b = duel.get("votes_b", 0)
@@ -352,15 +422,7 @@ async def send_result_email(duel: dict) -> None:
     </div>
     """
     try:
-        await asyncio.to_thread(
-            resend.Emails.send,
-            {
-                "from": SENDER_EMAIL,
-                "to": [duel["email"]],
-                "subject": s.get("subject", "OutfitDuel result"),
-                "html": html,
-            },
-        )
+        await send_mail(duel["email"], s.get("subject", "OutfitDuel result"), html)
     except Exception as exc:
         logger.warning("Failed to send result email: %s", exc)
 
@@ -574,7 +636,7 @@ REPORT_REASONS = {
 
 
 async def send_abuse_alert(duel_id: str, reason_code: str, report_count: int, request: Request) -> None:
-    if not resend.api_key:
+    if not SMTP_HOST and not resend.api_key:
         return
     base = os.environ.get("PUBLIC_BASE_URL", "").rstrip("/")
     if not base:
@@ -591,15 +653,7 @@ async def send_abuse_alert(duel_id: str, reason_code: str, report_count: int, re
     </div>
     """
     try:
-        await asyncio.to_thread(
-            resend.Emails.send,
-            {
-                "from": SENDER_EMAIL,
-                "to": [ABUSE_EMAIL],
-                "subject": f"OutfitDuel rapportage · {reason_label}",
-                "html": html,
-            },
-        )
+        await send_mail(CONTACT_EMAIL or ABUSE_EMAIL, f"OutfitDuel rapportage · {reason_label}", html)
     except Exception as exc:
         logger.warning("Failed to send abuse alert: %s", exc)
 
@@ -761,6 +815,30 @@ async def security_headers(request: Request, call_next):
     response.headers.setdefault("X-Frame-Options", "DENY")
     response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
     return response
+
+
+# SPA catch-all: serve the React production build for any non-API path.
+# Registered AFTER the API router so /api/* and /api/uploads/* keep working.
+# Enable by setting FRONTEND_BUILD_DIR (defaults to ./frontend_build next to server.py).
+if FRONTEND_BUILD_DIR.exists() and (FRONTEND_BUILD_DIR / "index.html").exists():
+    from fastapi.responses import FileResponse
+
+    # Serve hashed static assets under /static directly (CRA build layout)
+    static_dir = FRONTEND_BUILD_DIR / "static"
+    if static_dir.exists():
+        app.mount("/static", StaticFiles(directory=str(static_dir)), name="frontend-static")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def serve_spa(full_path: str):
+        # Hard guard: never shadow API/uploads/share routes.
+        if full_path.startswith("api/") or full_path == "api":
+            raise HTTPException(status_code=404)
+        if full_path:
+            candidate = FRONTEND_BUILD_DIR / full_path
+            if candidate.is_file():
+                return FileResponse(str(candidate))
+        # SPA fallback — let React Router handle client-side routes.
+        return FileResponse(str(FRONTEND_BUILD_DIR / "index.html"))
 
 
 @app.on_event("startup")

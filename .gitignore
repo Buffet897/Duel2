@@ -80,3 +80,12 @@ memory/test_credentials.md
 
 # Mobile development
 android-sdk/
+
+# OutfitDuel deployment
+backend/uploads/
+backend/frontend_build/
+frontend/build/
+logs/
+*.log
+backend/.env
+.env
