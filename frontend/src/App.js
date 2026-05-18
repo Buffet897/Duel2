@@ -6,6 +6,7 @@ import Create from "@/pages/Create";
 import Duel from "@/pages/Duel";
 import Result from "@/pages/Result";
 import Privacy from "@/pages/Privacy";
+import Terms from "@/pages/Terms";
 import NotFound from "@/pages/NotFound";
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
           <Route path="/duel/:id" element={<Duel />} />
           <Route path="/duel/:id/resultaat" element={<Result />} />
           <Route path="/privacy" element={<Privacy />} />
+          <Route path="/voorwaarden" element={<Terms />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

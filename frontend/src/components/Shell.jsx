@@ -21,9 +21,14 @@ export const Shell = ({ children, hideFooter = false }) => (
     {!hideFooter && (
       <footer className="px-5 py-6 border-t border-gray-100 text-xs text-gray-400 flex items-center justify-between">
         <span>© {new Date().getFullYear()} OutfitDuel</span>
-        <Link to="/privacy" className="underline-offset-4 hover:underline" data-testid="footer-privacy-link">
-          Privacybeleid
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link to="/voorwaarden" className="underline-offset-4 hover:underline" data-testid="footer-terms-link">
+            Voorwaarden
+          </Link>
+          <Link to="/privacy" className="underline-offset-4 hover:underline" data-testid="footer-privacy-link">
+            Privacybeleid
+          </Link>
+        </div>
       </footer>
     )}
   </div>
