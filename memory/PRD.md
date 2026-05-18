@@ -33,3 +33,16 @@ Gen-Z/Millennial fashion-conscious user who needs quick crowd-sourced opinion on
 
 ## Test credentials
 N/A — app requires no accounts.
+
+## Sprint 2 — Security & Juridisch (2026-02)
+- Upload security: strict MIME + magic-byte validation (JPEG/PNG/WebP only), 10MB cap, UUID filenames, EXIF strip
+- Rate limiting (in-memory IP buckets, honors RATE_LIMIT_DISABLED env):
+  - POST /api/duels: 3/IP/hour
+  - POST /api/duels/{id}/vote: 10/IP/hour
+  - POST /api/duels/{id}/report: 10/IP/hour
+- Security headers middleware: CSP, X-Content-Type-Options, X-Frame-Options, Referrer-Policy
+- Report system: POST /api/duels/{id}/report, 3 reasons (offensive/no_consent/spam), IP-hash dedup per duel, auto-hide at 3 reports, async Resend abuse alert
+- Hidden state: `is_hidden` flag in GET response, filtered from popular feed, blocks voting
+- Pages: /privacy ✓, /voorwaarden ✓ (added Sprint 1.5 with full legal text)
+- Cookie banner: bottom strip, 365-day consent cookie via od_cookie_consent
+- Trust X-Forwarded-For for client IP (k8s ingress fix)

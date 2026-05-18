@@ -8,6 +8,7 @@ import Result from "@/pages/Result";
 import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
 import NotFound from "@/pages/NotFound";
+import CookieBanner from "@/components/CookieBanner";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route path="/voorwaarden" element={<Terms />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <CookieBanner />
       </BrowserRouter>
     </div>
   );

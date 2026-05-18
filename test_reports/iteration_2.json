@@ -1,0 +1,37 @@
+{
+  "summary": "OutfitDuel Sprint 2 (Security & Juridisch) end-to-end testing complete. Backend: 15/15 new pytest tests pass covering security headers, upload validation (MIME/size/format), EXIF stripping, report system (invalid reason 400, IP-hash dedup, 3-report auto-hide, popular feed exclusion, hidden duel vote returns 410), and all 3 rate limits (3 duels/IP/hr, 10 votes/IP/hr, 10 reports/IP/hr → 429 on overflow). Frontend: cookie banner appears after ~600ms on first visit and disappears + cookie persists after Begrepen; ReportButton popover renders 3 reasons with correct data-testids and triggers Dutch success toast 'Bedankt voor je melding'; hidden-duel UI ('Dit duel is verborgen') renders correctly when is_hidden=true; footer has both Voorwaarden and Privacy links; /voorwaarden page renders all 12 sections via <Section number=...> components with data-testid='terms-section-{n}'.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/duels/{id}/report", "issue": "Rate limit is incremented BEFORE the dedup check, meaning a single attacker can be rate-limited by their own duplicate reports. Working as designed for abuse prevention but worth noting."},
+      {"endpoint": "in-memory RATE_BUCKETS", "issue": "Rate limit state lives in a process-local dict — does not survive backend restart and is not shared across replicas. Acceptable for MVP/single-pod but flag for production scale."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/sprint2_test.py",
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/sprint2_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "server.py grew to ~730 lines (was 530 in Sprint 1) — now AT the suggested 700-line split threshold. Recommend extracting routers (duels.py, reports.py, share.py) and services (email.py, security.py) in next sprint.",
+    "Security headers middleware correctly setdefault()s on every response including /api/uploads/* static files and /api/share/duel/{id} HTML — confirmed via curl.",
+    "compress_and_save explicitly clears image.info AND saves without the exif kwarg → verified at runtime: re-downloading the uploaded photo via /api/uploads/{file} shows no Make/Model EXIF tags even when source JPEG had them.",
+    "client_ip() correctly reads first-hop X-Forwarded-For — fixes the Sprint 1 concern about k8s ingress collapsing all users behind one IP.",
+    "send_abuse_alert is fire-and-forget via asyncio.create_task() — good UX (no blocking on email), and the no-op guard when RESEND_API_KEY is empty prevents crashes.",
+    "REPORT_REASONS validation in report_duel() uses an explicit allowlist (offensive/no_consent/spam) — properly rejects bogus values with 400."
+  ],
+  "updated_files": [
+    "/app/backend/tests/sprint2_test.py"
+  ],
+  "success_rate": {"backend": "100% (15/15 Sprint 2 + 17/17 Sprint 1 = 32/32)", "frontend": "100% (cookie banner, ReportButton, hidden-duel UI, footer, terms all pass)"},
+  "seed_data_creation": "Each Sprint 2 test creates throwaway duels prefixed TEST_ and deletes them via the delete_token. The 3-report auto-hide test and the rate-limit tests create a few duels that are also cleaned up. The frontend test creates one duel df3affa2d9 (hidden state) which remains in DB but expires in 48h.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Sprint 2 backend tests live at /app/backend/tests/sprint2_test.py. Each test uses a unique X-Forwarded-For IP via fake_ip() so rate-limit buckets don't bleed across tests; the dedicated TestRateLimits class uses a fixed IP intentionally. Server uses in-memory RATE_BUCKETS — restart backend (sudo supervisorctl restart backend) if you need to reset state. Cookie banner has a 600ms delay before showing; always wait_for_timeout(1500) before asserting visibility. The hidden-duel state UI shows 'Dit duel is verborgen' with a 'Terug naar home' CTA and replaces the voting cards entirely (confirmed via screenshot)."
+}

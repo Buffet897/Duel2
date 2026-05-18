@@ -4,6 +4,7 @@ import { motion, useMotionValue, useTransform } from "framer-motion";
 import { Copy, Share2, Check, ArrowRight, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import Shell from "@/components/Shell";
+import ReportButton from "@/components/ReportButton";
 import { api, buildAssetUrl } from "@/lib/api";
 
 const ANIMATION_REVEAL_MS = 700;
@@ -188,7 +189,26 @@ const Duel = () => {
         </h1>
       )}
 
-      {duel.is_expired ? (
+      {duel.is_hidden ? (
+        <div className="rounded-2xl bg-gray-50 border border-gray-100 p-6 text-center" data-testid="duel-hidden-state">
+          <div className="mx-auto h-12 w-12 rounded-full bg-[#F2F1FA] flex items-center justify-center mb-3">
+            <span className="text-[#7F77DD] text-xl">⚑</span>
+          </div>
+          <p className="text-base font-display font-semibold text-gray-900 mb-1">
+            Dit duel is verborgen
+          </p>
+          <p className="text-sm text-gray-500">
+            Het duel is meerdere keren gerapporteerd en wordt momenteel
+            beoordeeld door OutfitDuel.
+          </p>
+          <button
+            onClick={() => nav("/")}
+            className="mt-5 w-full bg-[#7F77DD] text-white py-3 rounded-full font-medium hover:bg-[#6B62D6] transition"
+          >
+            Terug naar home
+          </button>
+        </div>
+      ) : duel.is_expired ? (
         <div className="rounded-2xl bg-gray-50 border border-gray-100 p-5 text-center">
           <p className="text-sm text-gray-500 mb-2">Dit duel is afgelopen</p>
           <button
@@ -275,6 +295,8 @@ const Duel = () => {
           onResultPage={() => nav(`/duel/${id}/resultaat`)}
         />
       )}
+
+      {!duel.is_hidden && <ReportButton duelId={id} />}
     </Shell>
   );
 };
