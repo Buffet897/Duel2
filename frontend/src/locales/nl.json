@@ -1,0 +1,133 @@
+{
+  "home": {
+    "tagline": "Laat het internet beslissen",
+    "subtitle": "Upload twee outfits. Stel een vraag. Deel de link. De rest stemt.",
+    "cta_create": "Maak een duel",
+    "cta_popular": "Populair op het platform",
+    "active_duels": "duels deze week",
+    "how_it_works": "Zo werkt het",
+    "step_1": "Upload twee outfitfoto's",
+    "step_2": "Krijg een unieke link",
+    "step_3": "Deel met wie jij wilt",
+    "badge_new": "Nieuw · stem in 1 tik",
+    "duration": "48u looptijd",
+    "h1_part1": "Welke outfit",
+    "h1_part2": "moet ik aan?"
+  },
+  "create": {
+    "title": "Maak een duel",
+    "subtitle": "Upload twee outfits en laat je vrienden kiezen.",
+    "upload_a": "Foto A",
+    "upload_b": "Foto B",
+    "upload_hint": "Tik om te uploaden",
+    "change": "Wijzig",
+    "question_label": "Stelvraag (optioneel)",
+    "question_placeholder": "Welke outfit past beter bij een zomerdate?",
+    "question_examples": [
+      "Welke outfit past beter bij een zomerdate?",
+      "Welke is professioneler voor mijn sollicitatie?",
+      "Welke neem ik mee naar het festival?"
+    ],
+    "question_tip": "Tip: hou het kort en vriendelijk",
+    "email_label": "E-mail (optioneel)",
+    "email_placeholder": "jouw@mail.nl — voor het eindresultaat",
+    "privacy_note": "Jij bepaalt wie stemt — deel de link alleen met wie jij wilt. Foto's verdwijnen 7 dagen na het verlopen van het duel.",
+    "submit": "Duel aanmaken",
+    "uploading": "Bezig...",
+    "success": "Duel aangemaakt!"
+  },
+  "duel": {
+    "vote_a": "Stem A",
+    "vote_b": "Stem B",
+    "votes_count": "stemmen",
+    "vote_count_singular": "stem",
+    "total_votes": "Totaal",
+    "winner_chose": "koos Outfit",
+    "share_title": "Je duel staat live!",
+    "share_subtitle": "Deel de link met je netwerk — anders krijg je geen stemmen.",
+    "share_whatsapp": "WhatsApp",
+    "copy_link": "Kopieer link",
+    "copied": "Gekopieerd",
+    "expired": "Dit duel is afgelopen",
+    "view_result": "Bekijk eindresultaat",
+    "hidden_title": "Dit duel is verborgen",
+    "hidden_body": "Het duel is meerdere keren gerapporteerd en wordt momenteel beoordeeld door OutfitDuel.",
+    "back_home": "Terug naar home",
+    "swipe_hint": "📱 Of swipe links voor A · rechts voor B",
+    "default_question": "Welke outfit wint?",
+    "download_card_cta": "Download deelbaar kaartje",
+    "report": "Rapporteer dit duel",
+    "report_dialog_title": "Waarom rapporteer je dit?",
+    "report_options": {
+      "offensive": "Ongepaste of aanstootgevende inhoud",
+      "no_consent": "Ik sta hier niet op (zonder toestemming)",
+      "spam": "Spam of nep"
+    },
+    "report_hint": "Na 3 rapportages wordt dit duel automatisch verborgen voor moderatie.",
+    "report_thanks": "Bedankt voor je melding. We bekijken dit binnen 24 uur.",
+    "post_vote_title": "Heb jij ook een outfit-dilemma?",
+    "post_vote_body": "Maak gratis een duel en krijg snel antwoord.",
+    "post_vote_cta": "Maak gratis een duel"
+  },
+  "result": {
+    "title_final": "Eindstand",
+    "title_running": "Tussenstand",
+    "default_question": "Welke outfit wint?",
+    "share_card_title": "Deelbaar kaartje",
+    "share_card_subtitle": "Geoptimaliseerd voor Instagram & WhatsApp.",
+    "winner_chose": "koos Outfit",
+    "download": "Download",
+    "share_whatsapp": "WhatsApp",
+    "delete_button": "Verwijder dit duel",
+    "delete_confirm": "Weet je zeker dat je dit duel wilt verwijderen?",
+    "deleted": "Duel verwijderd",
+    "share_text": "Het resultaat van mijn OutfitDuel is binnen 👀"
+  },
+  "card": {
+    "download_stories": "Stories 9:16",
+    "download_feed": "Feed 1:1",
+    "toggle_with_photos": "Met foto's",
+    "toggle_without_photos": "Alleen resultaat",
+    "branding": "outfitduel.com",
+    "downloaded": "Kaartje gedownload",
+    "download_failed": "Download mislukt"
+  },
+  "cookie": {
+    "message": "OutfitDuel gebruikt alleen functionele cookies om dubbel stemmen te voorkomen. Geen tracking, geen advertenties.",
+    "privacy_link": "Meer info",
+    "accept": "Begrepen"
+  },
+  "footer": {
+    "privacy": "Privacybeleid",
+    "terms": "Voorwaarden",
+    "copyright": "© {year} OutfitDuel"
+  },
+  "header": {
+    "new_duel": "+ Nieuw duel"
+  },
+  "errors": {
+    "upload_type": "Alleen JPG, PNG en WebP bestanden zijn toegestaan.",
+    "upload_size": "Het bestand is te groot. Maximaal 10MB per foto.",
+    "upload_missing": "Upload eerst beide foto's",
+    "question_too_long": "Vraag mag max 80 tekens zijn",
+    "create_failed": "Aanmaken mislukt",
+    "rate_limit_duel": "Je kunt maximaal 3 duels per uur aanmaken. Probeer het later opnieuw.",
+    "rate_limit_vote": "Je hebt het maximale aantal stemmen bereikt. Kom later terug.",
+    "already_voted": "Je hebt al gestemd op dit duel.",
+    "duel_not_found": "Duel niet gevonden",
+    "report_failed": "Rapporteren mislukt",
+    "copy_failed": "Kopiëren mislukt",
+    "vote_failed": "Stemmen mislukt",
+    "delete_failed": "Verwijderen mislukt",
+    "generic": "Er is iets misgegaan. Probeer het opnieuw."
+  },
+  "common": {
+    "loading": "Laden…",
+    "not_found_title": "Duel niet gevonden",
+    "not_found_body": "Deze link bestaat niet of is verwijderd."
+  },
+  "language": {
+    "nl": "NL",
+    "en": "EN"
+  }
+}

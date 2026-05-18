@@ -5,8 +5,9 @@ import { toast } from "sonner";
 import { toPng } from "html-to-image";
 import Shell from "@/components/Shell";
 import { api, buildAssetUrl } from "@/lib/api";
+import { useT, votesLabel } from "@/lib/i18n";
 
-const CardCanvas = ({ duel, pctA, pctB, totalVotes, includePhotos, size, refEl }) => {
+const CardCanvas = ({ duel, pctA, pctB, totalVotes, includePhotos, size, refEl, t }) => {
   const dims =
     size === "story" ? { w: 1080, h: 1920 } : { w: 1080, h: 1080 };
   const winA = pctA >= pctB;
@@ -34,7 +35,7 @@ const CardCanvas = ({ duel, pctA, pctB, totalVotes, includePhotos, size, refEl }
         OutfitDuel
       </div>
       <div style={{ marginTop: 36, fontSize: size === "story" ? 64 : 52, fontWeight: 700, lineHeight: 1.1 }}>
-        {duel.question || "Welke outfit wint?"}
+        {duel.question || t("result.default_question")}
       </div>
 
       {includePhotos && (
@@ -95,19 +96,19 @@ const CardCanvas = ({ duel, pctA, pctB, totalVotes, includePhotos, size, refEl }
             {pctWin}%
           </div>
           <div style={{ marginTop: 24, fontSize: 56, fontWeight: 600 }}>
-            koos Outfit {winA ? "A" : "B"}
+            {t("result.winner_chose")} {winA ? "A" : "B"}
           </div>
           <div style={{ marginTop: 16, fontSize: 36, color: "#A3A3A3" }}>
-            vs {pctLose}% · {totalVotes} stem{totalVotes !== 1 ? "men" : ""}
+            vs {pctLose}% · {totalVotes} {votesLabel(totalVotes, t)}
           </div>
         </div>
       )}
 
       {includePhotos && (
         <div style={{ marginTop: 40, fontSize: 48, fontWeight: 700, color: "#050505" }}>
-          {pctWin}% koos Outfit {winA ? "A" : "B"}
+          {pctWin}% {t("result.winner_chose")} {winA ? "A" : "B"}
           <span style={{ fontSize: 30, color: "#A3A3A3", fontWeight: 500, marginLeft: 16 }}>
-            · {totalVotes} stem{totalVotes !== 1 ? "men" : ""}
+            · {totalVotes} {votesLabel(totalVotes, t)}
           </span>
         </div>
       )}
@@ -122,6 +123,7 @@ const CardCanvas = ({ duel, pctA, pctB, totalVotes, includePhotos, size, refEl }
 const Result = () => {
   const { id } = useParams();
   const nav = useNavigate();
+  const { t } = useT();
   const [duel, setDuel] = useState(null);
   const [withPhotos, setWithPhotos] = useState(true);
   const [size, setSize] = useState("story");
@@ -191,9 +193,9 @@ const Result = () => {
       } else {
         link.click();
       }
-      toast.success("Kaartje gedownload");
+      toast.success(t("card.downloaded"));
     } catch (err) {
-      toast.error("Download mislukt");
+      toast.error(t("card.download_failed"));
       // eslint-disable-next-line no-console
       console.error(err);
     }
@@ -201,14 +203,14 @@ const Result = () => {
 
   const shareWhatsapp = () => {
     const text = encodeURIComponent(
-      `Het resultaat van mijn OutfitDuel is binnen 👀\n${window.location.origin}/duel/${id}/resultaat`,
+      `${t("result.share_text")}\n${window.location.origin}/duel/${id}/resultaat`,
     );
     window.open(`https://wa.me/?text=${text}`, "_blank");
   };
 
   const deleteDuel = async () => {
     if (!ownToken) return;
-    if (!window.confirm("Weet je zeker dat je dit duel wilt verwijderen?")) return;
+    if (!window.confirm(t("result.delete_confirm"))) return;
     setDeleting(true);
     try {
       await api.delete(`/duels/${id}`, { params: { token: ownToken } });
@@ -217,10 +219,10 @@ const Result = () => {
         delete owned[id];
         localStorage.setItem("od_owned", JSON.stringify(owned));
       } catch (_) {}
-      toast.success("Duel verwijderd");
+      toast.success(t("result.deleted"));
       nav("/");
     } catch (err) {
-      toast.error("Verwijderen mislukt");
+      toast.error(t("errors.delete_failed"));
     } finally {
       setDeleting(false);
     }
@@ -230,9 +232,9 @@ const Result = () => {
     return (
       <Shell>
         <div className="pt-12 text-center">
-          <h1 className="text-2xl font-bold text-gray-950">Duel niet gevonden</h1>
+          <h1 className="text-2xl font-bold text-gray-950">{t("common.not_found_title")}</h1>
           <button onClick={() => nav("/")} className="mt-6 w-full bg-[#7F77DD] text-white py-3 rounded-full font-medium">
-            Terug naar home
+            {t("duel.back_home")}
           </button>
         </div>
       </Shell>
@@ -241,7 +243,7 @@ const Result = () => {
   if (!duel || !preparedDuel) {
     return (
       <Shell>
-        <div className="pt-12 text-center text-gray-400">Laden…</div>
+        <div className="pt-12 text-center text-gray-400">{t("common.loading")}</div>
       </Shell>
     );
   }
@@ -252,10 +254,10 @@ const Result = () => {
   return (
     <Shell>
       <h1 className="text-2xl font-bold tracking-tight text-gray-950">
-        {duel.is_expired ? "Eindstand" : "Tussenstand"}
+        {duel.is_expired ? t("result.title_final") : t("result.title_running")}
       </h1>
       <p className="mt-1 text-sm text-gray-600">
-        {duel.question || "Welke outfit wint?"}
+        {duel.question || t("result.default_question")}
       </p>
 
       <div className="mt-5 rounded-2xl bg-[#F2F1FA] p-5 text-center">
@@ -263,10 +265,10 @@ const Result = () => {
           {pctWin}%
         </div>
         <div className="text-base text-gray-700 mt-1">
-          koos Outfit {winA ? "A" : "B"}
+          {t("result.winner_chose")} {winA ? "A" : "B"}
         </div>
         <div className="text-xs text-gray-500 mt-1" data-testid="result-vote-count">
-          · {totalVotes} stem{totalVotes !== 1 ? "men" : ""}
+          · {totalVotes} {votesLabel(totalVotes, t)}
         </div>
       </div>
 
@@ -288,8 +290,8 @@ const Result = () => {
       </div>
 
       <div className="mt-8">
-        <h2 className="text-lg font-display font-semibold text-gray-900">Deelbaar kaartje</h2>
-        <p className="mt-1 text-sm text-gray-500">Geoptimaliseerd voor Instagram & WhatsApp.</p>
+        <h2 className="text-lg font-display font-semibold text-gray-900">{t("result.share_card_title")}</h2>
+        <p className="mt-1 text-sm text-gray-500">{t("result.share_card_subtitle")}</p>
 
         <div className="mt-4 inline-flex p-1 bg-gray-100 rounded-full" role="tablist">
           <button
@@ -298,7 +300,7 @@ const Result = () => {
             data-testid="toggle-with-photos"
             className={`px-4 py-1.5 text-sm font-medium rounded-full transition ${withPhotos ? "bg-white shadow text-gray-900" : "text-gray-500"}`}
           >
-            <ImageIcon className="h-3.5 w-3.5 inline mr-1.5" /> Met foto's
+            <ImageIcon className="h-3.5 w-3.5 inline mr-1.5" /> {t("card.toggle_with_photos")}
           </button>
           <button
             type="button"
@@ -306,7 +308,7 @@ const Result = () => {
             data-testid="toggle-only-result"
             className={`px-4 py-1.5 text-sm font-medium rounded-full transition ${!withPhotos ? "bg-white shadow text-gray-900" : "text-gray-500"}`}
           >
-            <Hash className="h-3.5 w-3.5 inline mr-1.5" /> Alleen resultaat
+            <Hash className="h-3.5 w-3.5 inline mr-1.5" /> {t("card.toggle_without_photos")}
           </button>
         </div>
 
@@ -317,7 +319,7 @@ const Result = () => {
             data-testid="toggle-size-story"
             className={`px-4 py-1.5 text-sm font-medium rounded-full transition ${size === "story" ? "bg-white shadow text-gray-900" : "text-gray-500"}`}
           >
-            Stories 9:16
+            {t("card.download_stories")}
           </button>
           <button
             type="button"
@@ -325,7 +327,7 @@ const Result = () => {
             data-testid="toggle-size-feed"
             className={`px-4 py-1.5 text-sm font-medium rounded-full transition ${size === "feed" ? "bg-white shadow text-gray-900" : "text-gray-500"}`}
           >
-            Feed 1:1
+            {t("card.download_feed")}
           </button>
         </div>
 
@@ -338,6 +340,7 @@ const Result = () => {
             pctB={pctB}
             totalVotes={totalVotes}
             size={size}
+            t={t}
           />
         </div>
 
@@ -347,14 +350,14 @@ const Result = () => {
             data-testid="download-card-button"
             className="inline-flex items-center justify-center gap-1.5 bg-[#7F77DD] text-white py-3 rounded-full font-medium hover:bg-[#6B62D6] transition"
           >
-            <Download className="h-4 w-4" /> Download
+            <Download className="h-4 w-4" /> {t("result.download")}
           </button>
           <button
             onClick={shareWhatsapp}
             data-testid="share-result-whatsapp"
             className="inline-flex items-center justify-center gap-1.5 bg-[#25D366] text-white py-3 rounded-full font-medium hover:opacity-95 transition"
           >
-            <Share2 className="h-4 w-4" /> WhatsApp
+            <Share2 className="h-4 w-4" /> {t("result.share_whatsapp")}
           </button>
         </div>
       </div>
@@ -366,21 +369,21 @@ const Result = () => {
           data-testid="delete-duel-button"
           className="mt-8 w-full inline-flex items-center justify-center gap-1.5 text-red-500 text-sm font-medium hover:text-red-600 transition"
         >
-          <Trash2 className="h-4 w-4" /> Verwijder dit duel
+          <Trash2 className="h-4 w-4" /> {t("result.delete_button")}
         </button>
       )}
 
       {/* Off-screen canvases for ALL four variants — instant toggle, no recompute */}
-      <CardCanvas duel={preparedDuel} pctA={pctA} pctB={pctB} totalVotes={totalVotes} includePhotos={true} size="story" refEl={storyPhotoRef} />
-      <CardCanvas duel={preparedDuel} pctA={pctA} pctB={pctB} totalVotes={totalVotes} includePhotos={false} size="story" refEl={storyCleanRef} />
-      <CardCanvas duel={preparedDuel} pctA={pctA} pctB={pctB} totalVotes={totalVotes} includePhotos={true} size="feed" refEl={feedPhotoRef} />
-      <CardCanvas duel={preparedDuel} pctA={pctA} pctB={pctB} totalVotes={totalVotes} includePhotos={false} size="feed" refEl={feedCleanRef} />
+      <CardCanvas duel={preparedDuel} pctA={pctA} pctB={pctB} totalVotes={totalVotes} includePhotos={true} size="story" refEl={storyPhotoRef} t={t} />
+      <CardCanvas duel={preparedDuel} pctA={pctA} pctB={pctB} totalVotes={totalVotes} includePhotos={false} size="story" refEl={storyCleanRef} t={t} />
+      <CardCanvas duel={preparedDuel} pctA={pctA} pctB={pctB} totalVotes={totalVotes} includePhotos={true} size="feed" refEl={feedPhotoRef} t={t} />
+      <CardCanvas duel={preparedDuel} pctA={pctA} pctB={pctB} totalVotes={totalVotes} includePhotos={false} size="feed" refEl={feedCleanRef} t={t} />
     </Shell>
   );
 };
 
 /* Visible scaled preview — uses CSS only, not exported */
-const PreviewCard = ({ duel, includePhotos, pctA, pctB, totalVotes, size }) => {
+const PreviewCard = ({ duel, includePhotos, pctA, pctB, totalVotes, size, t }) => {
   const winA = pctA >= pctB;
   const pctWin = winA ? pctA : pctB;
   const ratio = size === "story" ? "aspect-[9/16]" : "aspect-square";
@@ -388,7 +391,7 @@ const PreviewCard = ({ duel, includePhotos, pctA, pctB, totalVotes, size }) => {
     <div className={`${ratio} w-full bg-white p-4 flex flex-col`} data-testid="card-preview">
       <div className="text-[10px] uppercase tracking-widest text-[#7F77DD] font-bold">OutfitDuel</div>
       <div className="mt-2 font-display font-bold text-gray-950 text-base leading-tight line-clamp-2">
-        {duel.question || "Welke outfit wint?"}
+        {duel.question || t("result.default_question")}
       </div>
       {includePhotos ? (
         <div className={`mt-3 grid ${size === "story" ? "grid-cols-1 grid-rows-2" : "grid-cols-2"} gap-2 flex-1 min-h-0`}>
@@ -410,14 +413,14 @@ const PreviewCard = ({ duel, includePhotos, pctA, pctB, totalVotes, size }) => {
       ) : (
         <div className="flex-1 flex flex-col items-center justify-center">
           <div className="text-5xl font-display font-bold text-[#7F77DD] leading-none">{pctWin}%</div>
-          <div className="mt-2 text-sm font-semibold text-gray-900">koos Outfit {winA ? "A" : "B"}</div>
-          <div className="mt-1 text-[10px] text-gray-400">· {totalVotes} stem{totalVotes !== 1 ? "men" : ""}</div>
+          <div className="mt-2 text-sm font-semibold text-gray-900">{t("result.winner_chose")} {winA ? "A" : "B"}</div>
+          <div className="mt-1 text-[10px] text-gray-400">· {totalVotes} {votesLabel(totalVotes, t)}</div>
         </div>
       )}
       {includePhotos && (
         <div className="mt-2 text-sm font-bold text-gray-900">
-          {pctWin}% koos Outfit {winA ? "A" : "B"}{" "}
-          <span className="text-xs text-gray-400 font-medium">· {totalVotes} stem{totalVotes !== 1 ? "men" : ""}</span>
+          {pctWin}% {t("result.winner_chose")} {winA ? "A" : "B"}{" "}
+          <span className="text-xs text-gray-400 font-medium">· {totalVotes} {votesLabel(totalVotes, t)}</span>
         </div>
       )}
       <div className="mt-1 text-[9px] uppercase tracking-widest text-gray-400">outfitduel.com</div>

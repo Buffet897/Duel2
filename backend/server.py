@@ -20,6 +20,7 @@ import asyncio
 import hashlib
 import html as _html
 import io
+import json
 import logging
 import os
 import secrets
@@ -78,6 +79,36 @@ db = client[os.environ["DB_NAME"]]
 resend.api_key = os.environ.get("RESEND_API_KEY", "")
 SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "onboarding@resend.dev")
 ABUSE_EMAIL = os.environ.get("ABUSE_EMAIL", "abuse@outfitduel.com")
+
+# Locales — load both files once at startup
+LOCALES_DIR = ROOT_DIR / "locales"
+LOCALES = {}
+for _code in ("nl", "en"):
+    try:
+        with open(LOCALES_DIR / f"{_code}.json", encoding="utf-8") as _f:
+            LOCALES[_code] = json.load(_f)
+    except FileNotFoundError:
+        LOCALES[_code] = {}
+
+
+def pick_lang(value: Optional[str]) -> str:
+    """Normalise a language hint to either 'nl' or 'en' (en default)."""
+    if not value:
+        return "en"
+    head = value.split(",")[0].split(";")[0].strip().lower()
+    return "nl" if head.startswith("nl") else "en"
+
+
+def request_lang(request: Request) -> str:
+    """Detect language: od_lang cookie wins, then Accept-Language header."""
+    cookie = request.cookies.get("od_lang")
+    if cookie in ("nl", "en"):
+        return cookie
+    return pick_lang(request.headers.get("accept-language"))
+
+
+def L(lang: str) -> dict:
+    return LOCALES.get(lang) or LOCALES.get("en") or {}
 
 app = FastAPI(title="OutfitDuel API")
 api_router = APIRouter(prefix="/api")
@@ -287,27 +318,37 @@ async def send_result_email(duel: dict) -> None:
         pct_b = 100 - pct_a
     base = os.environ.get("PUBLIC_BASE_URL", "").rstrip("/")
     result_url = f"{base}/duel/{duel['id']}/resultaat" if base else f"/duel/{duel['id']}/resultaat"
+    lang = duel.get("lang") or "nl"
+    s = L(lang)
+    votes_word_a = s.get("votes_label_singular") if votes_a == 1 else s.get("votes_label", "votes")
+    votes_word_b = s.get("votes_label_singular") if votes_b == 1 else s.get("votes_label", "votes")
+    title = _html.escape(s.get("title", "OutfitDuel"))
+    question = _html.escape(duel.get("question") or s.get("default_question", ""))
+    cta = _html.escape(s.get("cta", "View result"))
+    footer = _html.escape(s.get("footer", ""))
+    outfit_a = _html.escape(s.get("outfit_a", "Outfit A"))
+    outfit_b = _html.escape(s.get("outfit_b", "Outfit B"))
     html = f"""
     <div style="font-family: -apple-system, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
-        <h1 style="color:#050505; font-size:24px;">Je OutfitDuel is afgelopen ⏱️</h1>
-        <p style="color:#525252; font-size:16px;">{duel.get('question') or 'Welke outfit wint?'}</p>
+        <h1 style="color:#050505; font-size:24px;">{title}</h1>
+        <p style="color:#525252; font-size:16px;">{question}</p>
         <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;">
             <tr>
                 <td style="padding:12px; background:#F2F1FA; border-radius:12px; text-align:center;">
                     <div style="color:#7F77DD; font-size:32px; font-weight:700;">{pct_a}%</div>
-                    <div style="color:#525252; font-size:13px;">Outfit A · {votes_a} stemmen</div>
+                    <div style="color:#525252; font-size:13px;">{outfit_a} · {votes_a} {votes_word_a}</div>
                 </td>
                 <td width="12"></td>
                 <td style="padding:12px; background:#F2F1FA; border-radius:12px; text-align:center;">
                     <div style="color:#7F77DD; font-size:32px; font-weight:700;">{pct_b}%</div>
-                    <div style="color:#525252; font-size:13px;">Outfit B · {votes_b} stemmen</div>
+                    <div style="color:#525252; font-size:13px;">{outfit_b} · {votes_b} {votes_word_b}</div>
                 </td>
             </tr>
         </table>
         <p style="margin-top:24px;">
-            <a href="{result_url}" style="background:#7F77DD; color:white; padding:12px 24px; border-radius:999px; text-decoration:none; font-weight:500;">Bekijk eindresultaat</a>
+            <a href="{result_url}" style="background:#7F77DD; color:white; padding:12px 24px; border-radius:999px; text-decoration:none; font-weight:500;">{cta}</a>
         </p>
-        <p style="color:#A3A3A3; font-size:12px; margin-top:32px;">outfitduel.com · Jouw outfit-dilemma's beslecht</p>
+        <p style="color:#A3A3A3; font-size:12px; margin-top:32px;">{footer}</p>
     </div>
     """
     try:
@@ -316,7 +357,7 @@ async def send_result_email(duel: dict) -> None:
             {
                 "from": SENDER_EMAIL,
                 "to": [duel["email"]],
-                "subject": "Je OutfitDuel is afgelopen — bekijk het resultaat",
+                "subject": s.get("subject", "OutfitDuel result"),
                 "html": html,
             },
         )
@@ -370,6 +411,7 @@ async def create_duel(
     question = (question or "").strip()[:80]
     duel_id = uuid.uuid4().hex[:10]
     delete_token = secrets.token_urlsafe(24)
+    lang = request_lang(request)
 
     file_a = await compress_and_save(photo_a, "a", duel_id)
     file_b = await compress_and_save(photo_b, "b", duel_id)
@@ -391,6 +433,7 @@ async def create_duel(
         "result_email_sent": False,
         "is_hidden": False,
         "report_count": 0,
+        "lang": lang,
     }
     await db.duels.insert_one(doc)
     await db.stats.update_one({"_id": "global"}, {"$inc": {"total_duels": 1}}, upsert=True)
@@ -656,11 +699,12 @@ async def share_preview(duel_id: str, request: Request):
         base = f"{request.url.scheme}://{request.url.netloc}"
     image_url = f"{base}/api/uploads/{doc['photo_a']}"
     target = f"{base}/duel/{duel_id}"
-    raw_title = doc.get("question") or "Welke outfit wint?"
+    lang = request_lang(request)
+    raw_title = doc.get("question") or L(lang).get("default_question") or "Which outfit wins?"
     title = _html.escape(raw_title, quote=True)
-    description = "Stem jij ook? → outfitduel.com"
+    description = L(lang).get("og_description", "Cast your vote! → outfitduel.com")
     html = f"""<!doctype html>
-<html lang="nl">
+<html lang="{lang}">
 <head>
 <meta charset="utf-8" />
 <title>{title} · OutfitDuel</title>

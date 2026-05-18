@@ -9,23 +9,26 @@ import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
 import NotFound from "@/pages/NotFound";
 import CookieBanner from "@/components/CookieBanner";
+import { LanguageProvider } from "@/lib/i18n";
 
 function App() {
   return (
     <div className="App">
-      <BrowserRouter>
-        <Toaster position="top-center" richColors closeButton />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/nieuw" element={<Create />} />
-          <Route path="/duel/:id" element={<Duel />} />
-          <Route path="/duel/:id/resultaat" element={<Result />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/voorwaarden" element={<Terms />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <CookieBanner />
-      </BrowserRouter>
+      <LanguageProvider>
+        <BrowserRouter>
+          <Toaster position="top-center" richColors closeButton />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/nieuw" element={<Create />} />
+            <Route path="/duel/:id" element={<Duel />} />
+            <Route path="/duel/:id/resultaat" element={<Result />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/voorwaarden" element={<Terms />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <CookieBanner />
+        </BrowserRouter>
+      </LanguageProvider>
     </div>
   );
 }

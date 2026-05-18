@@ -1,0 +1,12 @@
+{
+  "subject": "Your OutfitDuel result is in!",
+  "title": "Your OutfitDuel has ended ⏱️",
+  "default_question": "Which outfit wins?",
+  "cta": "View final result",
+  "footer": "outfitduel.com · Your outfit dilemmas settled",
+  "votes_label": "votes",
+  "votes_label_singular": "vote",
+  "outfit_a": "Outfit A",
+  "outfit_b": "Outfit B",
+  "og_description": "Cast your vote! → outfitduel.com"
+}

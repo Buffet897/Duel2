@@ -1,0 +1,44 @@
+{
+  "summary": "Sprint 3 i18n testing complete. Backend: 11/11 tests pass (duel.lang storage from Accept-Language + cookie override, /api/share/duel/{id} renders correct lang in og:description and html lang, send_result_email helper picks correct locale dictionary, regression endpoints still work). Frontend: NL/EN UI rendering verified across home/create/duel/result/report/cookie-banner; pluralization works ('1 stem'/'2 stemmen' and '1 vote'/'votes'); od_lang cookie persists 365 days; Privacy/Terms legal content remains Dutch (intentional) while header/footer chrome translates. One minor UX issue: cookie banner overlay can block the language switcher buttons in the footer until dismissed.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "Shell / LanguageSwitch + CookieBanner",
+        "issue": "Cookie banner (fixed-positioned bottom-right) overlays the language switcher buttons in the footer. While the cookie banner is visible (first 600ms+ on a fresh visit), clicking 'NL | EN' is intercepted by the banner overlay and the click does not register, leaving the user unable to switch language until they accept the banner. Easily reproducible: fresh visit → wait for banner → try to click lang-en — cookie stays unchanged. After dismissing the banner with 'Got it'/'Begrepen' the switcher works perfectly.",
+        "selector": "[data-testid=\"language-switch\"] vs the CookieBanner element",
+        "priority": "MEDIUM"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/sprint3_i18n_test.py",
+    "/app/test_reports/pytest/sprint3_results.xml"
+  ],
+  "action_items": [
+    "Raise z-index of the footer LanguageSwitch above the CookieBanner, OR move the LanguageSwitch out of the footer chrome (e.g., into the header) so it remains clickable while the cookie banner is shown. Alternatively: dismiss/hide the cookie banner only after the user has had a chance to switch language, or render the language switch on top of the banner overlay."
+  ],
+  "critical_code_review_comments": [
+    "send_result_email defaults lang to 'nl' for missing field — verified intentional per requirements (legacy pre-Sprint-3 duels).",
+    "share_preview reads request_lang which prefers cookie over Accept-Language — matches spec.",
+    "i18n.jsx writes cookie via document.cookie SameSite=Lax; works as expected and survives reload.",
+    "Pluralization helper votesLabel() correctly switches singular/plural per language in both NL and EN; observed live in popular feed cards.",
+    "Privacy + Terms pages intentionally keep Dutch legal text but Shell chrome (header/footer/buttons) does translate via t() — confirmed live."
+  ],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "100% (11/11)",
+    "frontend": "95% — all i18n flows work; one z-index/overlay UX issue with cookie banner blocking language switcher on first visit"
+  },
+  "test_credentials": "n/a — no auth in this app",
+  "seed_data_creation": "Test duels created via /api/duels with prefix 'TEST_'; all cleaned up via DELETE with delete_token in test teardown.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Sprint 3 i18n is fully functional. Backend test file /app/backend/tests/sprint3_i18n_test.py covers duel.lang storage (cookie priority over Accept-Language), share preview HTML lang + og:description, and send_result_email locale resolution. Frontend manual checks confirmed: clicking lang-en/lang-nl writes cookie + reloads with translated UI; only quirk is cookie banner overlaps the footer switcher on first visit. Sprint 1+2 regression suites (backend_test.py, sprint2_test.py) were not re-run in this iteration but the i18n test suite includes basic regression coverage (/api/, /api/duels/popular, /api/stats/weekly).",
+  "rca of the issue": "Cookie banner overlay vs language switcher: CookieBanner renders as a fixed-positioned element with a higher stacking order than the footer LanguageSwitch element. Even with Playwright force=True clicks, the banner element receives the pointer event in the DOM hit-test because both occupy the same bottom region of the viewport on the standard mobile-first layout. Mitigation: increase z-index of LanguageSwitch (or its parent footer) above the CookieBanner, or relocate the switcher into the header so it never overlaps with a bottom-anchored banner."
+}
