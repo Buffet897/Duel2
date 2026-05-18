@@ -46,3 +46,11 @@ N/A — app requires no accounts.
 - Pages: /privacy ✓, /voorwaarden ✓ (added Sprint 1.5 with full legal text)
 - Cookie banner: bottom strip, 365-day consent cookie via od_cookie_consent
 - Trust X-Forwarded-For for client IP (k8s ingress fix)
+
+## Sprint 3 — i18n NL + EN (2026-02)
+- Frontend: locales/{nl,en}.json + i18n.jsx (LanguageProvider, useT, votesLabel) + axios Accept-Language interceptor
+- Language detection: od_lang cookie (365d) wins → falls back to navigator.language.startsWith('nl')
+- Language switch in HEADER (moved from footer to stay clickable even when cookie banner is shown)
+- Backend: locales/{nl,en}.json (email + og_description), request_lang() helper, doc.lang stored on create, send_result_email reads duel.lang, /api/share/duel returns lang-aware og:description + html attribute
+- Privacy + Terms intentionally remain Dutch legal text (translating would alter meaning); chrome around them is translated
+- 11/11 i18n backend tests pass on top of existing 32/32 Sprint 1+2 suite

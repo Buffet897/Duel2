@@ -1,12 +1,11 @@
 import { Link } from "react-router-dom";
 import { useT } from "@/lib/i18n";
 
-const LanguageSwitch = () => {
+const LanguageSwitch = ({ className = "" }) => {
   const { lang, setLang } = useT();
   const change = (next) => () => {
     if (lang === next) return;
     setLang(next);
-    // Reload so any server-rendered fragments (OG, etc.) pick up the change.
     setTimeout(() => window.location.reload(), 80);
   };
   const cls = (active) =>
@@ -14,7 +13,10 @@ const LanguageSwitch = () => {
       ? "text-gray-900 font-semibold cursor-default"
       : "text-gray-400 hover:text-gray-600 transition";
   return (
-    <span className="inline-flex items-center gap-1.5 text-[11px] tracking-wider" data-testid="language-switch">
+    <span
+      className={`inline-flex items-center gap-1.5 text-[11px] tracking-wider ${className}`}
+      data-testid="language-switch"
+    >
       <button
         type="button"
         onClick={change("nl")}
@@ -49,13 +51,16 @@ export const Shell = ({ children, hideFooter = false }) => {
             OutfitDuel
           </span>
         </Link>
-        <Link
-          to="/nieuw"
-          className="text-sm font-medium text-[#7F77DD] hover:text-[#6B62D6] transition"
-          data-testid="header-new-duel-link"
-        >
-          {t("header.new_duel")}
-        </Link>
+        <div className="flex items-center gap-4">
+          <LanguageSwitch />
+          <Link
+            to="/nieuw"
+            className="text-sm font-medium text-[#7F77DD] hover:text-[#6B62D6] transition"
+            data-testid="header-new-duel-link"
+          >
+            {t("header.new_duel")}
+          </Link>
+        </div>
       </header>
       <main className="flex-1 px-5 pb-24">{children}</main>
       {!hideFooter && (
@@ -68,7 +73,6 @@ export const Shell = ({ children, hideFooter = false }) => {
             <Link to="/privacy" className="underline-offset-4 hover:underline" data-testid="footer-privacy-link">
               {t("footer.privacy")}
             </Link>
-            <LanguageSwitch />
           </div>
         </footer>
       )}
