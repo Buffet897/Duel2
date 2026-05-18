@@ -480,7 +480,9 @@ async def share_preview(duel_id: str, request: Request):
         base = f"{request.url.scheme}://{request.url.netloc}"
     image_url = f"{base}/api/uploads/{doc['photo_a']}"
     target = f"{base}/duel/{duel_id}"
-    title = doc.get("question") or "Welke outfit wint?"
+    raw_title = doc.get("question") or "Welke outfit wint?"
+    import html as _html
+    title = _html.escape(raw_title, quote=True)
     description = "Stem jij ook? → outfitduel.com"
     html = f"""<!doctype html>
 <html lang="nl">
